@@ -4,7 +4,8 @@ import info.gridworld.actor.Rock;
 import info.gridworld.grid.Grid;
 import info.gridworld.grid.BoundedGrid;
 import info.gridworld.grid.Location;
-
+import java.util.ArrayList;
+import java.util.Scanner;
 /**
  * Game of Life starter code. Demonstrates how to create and populate the game using the GridWorld framework.
  * Also demonstrates how to provide accessor methods to make the class testable by unit tests.
@@ -17,10 +18,9 @@ public class GameOfLife
     // the world comprised of the grid that displays the graphics for the game
     private ActorWorld world;
     
-    // the game board will have 5 rows and 5 columns
-    private final int ROWS = 5;
-    private final int COLS = 5;
-    
+    // the game board will have 10 rows and 10 columns
+    private final int ROWS = 30;
+    private final int COLS = 30;
     /**
      * Default constructor for objects of class GameOfLife
      * 
@@ -53,9 +53,11 @@ public class GameOfLife
     private void populateGame()
     {
         // constants for the location of the three cells initially alive
-        final int X1 = 2, Y1 = 0;
-        final int X2 = 0, Y2 = 2;
-        final int X3 = 1, Y3 = 2;
+        final int X1 = 1, Y1 = 0;
+        final int X2 = 2, Y2 = 1;
+        final int X3 = 0, Y3 = 2;
+        final int X4 = 1, Y4 = 2;
+        final int X5 = 2, Y5 = 2;
 
         // the grid of Actors that maintains the state of the game
         //  (alive cells contains actors; dead cells do not)
@@ -73,6 +75,14 @@ public class GameOfLife
         Rock rock3 = new Rock();
         Location loc3 = new Location(Y3, X3);
         grid.put(loc3, rock3);
+        
+        Rock rock4 = new Rock();
+        Location loc4 = new Location(Y4, X4);
+        grid.put(loc4, rock4);
+        
+        Rock rock5 = new Rock();
+        Location loc5 = new Location(Y5, X5);
+        grid.put(loc5, rock5);
     }
 
     /**
@@ -83,17 +93,41 @@ public class GameOfLife
      * @post    the world has been populated with a new grid containing the next generation
      * 
      */
-    private void createNextGeneration()
+    public void createNextGeneration()
     {
-        /** You will need to read the documentation for the World, Grid, and Location classes
-         *      in order to implement the Game of Life algorithm and leverage the GridWorld framework.
-         */
-        
+        ArrayList<Location> survivors = new ArrayList<Location>();
+        ArrayList<Actor> neighbors = new ArrayList<Actor>();
+        ArrayList<Location> currentlyAlive = new ArrayList<Location>();
         // create the grid, of the specified size, that contains Actors
         Grid<Actor> grid = world.getGrid();
-        
-        // insert magic here...
-        
+        for (int row=0;row<ROWS;row++)//Cycle through the rows 1 by 1
+        {
+            for (int col=0;col<COLS;col++)//Cycle through the columns 1 by 1
+            {
+                Location loc = new Location(row,col);
+                Actor cell = grid.get(loc);
+                neighbors = grid.getNeighbors(loc);
+                if (cell== null && neighbors.size()==3)
+                    // decide if an empty cell should come to life
+                    survivors.add(loc);
+                else if (cell!=null)
+                {
+                    //decide if a live cell should stay alive or die
+                    currentlyAlive.add(loc);
+                    if (neighbors.size()==2||neighbors.size()==3)
+                        survivors.add(loc);
+                }
+            }
+        }
+        for (Location die : currentlyAlive)
+            //kill every live cell
+            grid.remove(die);
+        for (Location newloc : survivors)
+        {
+            //recreate all cells that should be alive in the new generation
+            Rock newrock= new Rock();
+            grid.put(newloc,newrock);
+        }
     }
     
     /**
@@ -131,14 +165,22 @@ public class GameOfLife
         return COLS;
     }
     
-    
     /**
      * Creates an instance of this class. Provides convenient execution.
      *
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws InterruptedException
     {
         GameOfLife game = new GameOfLife();
+        //Lets the user know how to enter a custom pattern, and how to start the program
+        System.out.print("If you want to enter a custom pattern, click a cell and use the\nbuttons to create a different beginning pattern.\nEnter anything here after you press [Run] in order to begin: ");
+        Scanner scan = new Scanner(System.in);
+        String block = scan.next();//This is only necessary to avoid a problem with Gridworld that starts the program automatically without updating unless you press [Run]
+        for (int i=0; i<100; i++)
+        {
+            //Updates the grid by generation and adds a pause to space things out
+            game.createNextGeneration();
+            Thread.sleep(500);
+        }
     }
-
 }

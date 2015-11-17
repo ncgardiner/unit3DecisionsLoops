@@ -14,18 +14,21 @@ public class PalindromeTester
    public static void main (String[] args)
    {
       String str, another = "y";
+      String newstr;
       int left, right;
       Scanner s = new Scanner(System.in);
 
       while (another.equalsIgnoreCase("y")) // allows y or Y
       {
-         System.out.println ("Enter a potential palindrome:");
+         System.out.println ("Enter a potential palindrome (No punctuation other than periods)");
          str = s.nextLine();
+         newstr = str.replace(".", "");
+         newstr = newstr.replace(" ", "");
 
          left = 0;
-         right = str.length() - 1;
+         right = newstr.length() - 1;
 
-         while (str.charAt(left) == str.charAt(right) && left < right)
+         while (newstr.charAt(left) == newstr.charAt(right) && left < right)
          {
             left++;
             right--;
